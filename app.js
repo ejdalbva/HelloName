@@ -5,6 +5,7 @@ const nameInput   = document.getElementById("nameInput");
 const colorInput  = document.getElementById("colorInput");
 const saveBtn     = document.getElementById("saveBtn");
 const forgetBtn   = document.getElementById("forgetBtn");
+const newColorBtn = document.getElementById("newColorBtn");
 const greetingTxt = document.getElementById("greeting");
 const colorTxt    = document.getElementById("color");   // <-- added (see note)
 
@@ -12,10 +13,11 @@ const STORAGE_KEY = "userName";
 const COLOR_KEY = "favoriteColor";
 
 // --- Decide which view to show, based on stored data ---
-function render() {
+function render(showAsk) {
   const savedName = localStorage.getItem(STORAGE_KEY);
   const savedColor = localStorage.getItem(COLOR_KEY);
   greetingTxt.textContent = "";
+  greetingTxt.style.color = "black"
   colorTxt.textContent = "";
   if (savedName || savedColor){
     if (savedName) {
@@ -23,12 +25,15 @@ function render() {
     }
     if (savedColor) {
         colorTxt.textContent = "Favorite color: " + savedColor;
+        greetingTxt.style.color = savedColor;
     }
-    askView.classList.add("hidden");
-    greetView.classList.remove("hidden");
-  } else {
+  }
+  if (showAsk){
     askView.classList.remove("hidden");
     greetView.classList.add("hidden");
+  } else {
+    askView.classList.add("hidden");
+    greetView.classList.remove("hidden");
   }
 }
 
@@ -62,20 +67,27 @@ saveBtn.addEventListener("click", function () {
     // similarly, remove any previously-stored value
     localStorage.removeItem(COLOR_KEY);
   }
-  render();
+  render(false);
 });
 
-// --- Forget button: clear the stored name, then re-render ---
+// --- Forget button: clear only the stored name 
+// then re-render ---
 forgetBtn.addEventListener("click", function () {
   localStorage.removeItem(STORAGE_KEY);
-  localStorage.removeItem(COLOR_KEY);
   nameInput.value = "";
-  colorInput.value = "";
-  render();
+  render(true);
 });
 
+// --- New color button: clear only the current color
+// then re-render to allow a new color choice
+newColorBtn.addEventListener("click", function() {
+  localStorage.removeItem(COLOR_KEY);
+  colorInput.value = "";
+  render(true);
+})
+
 // --- Run once at startup ---
-render();
+render(true);
 
 
 // ---- Register the service worker ----
