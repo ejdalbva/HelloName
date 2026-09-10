@@ -5,7 +5,7 @@
 
 // A version-stamped cache name. Bump the version (v1 -> v2)
 // whenever you change cached files, so old caches get cleaned.
-const CACHE_NAME = "hello-name-v6";
+const CACHE_NAME = "hello-name-v10";
 
 // The files that make up the "app shell" — everything needed
 // to load and run offline. Paths are relative to this file's folder.
@@ -29,7 +29,7 @@ self.addEventListener("install", (event) => {
     (async () => {
       const cache = await caches.open(CACHE_NAME);
       await cache.addAll(FILES_TO_CACHE);   // fetch + store all files
-      await self.skipWaiting();             // activate immediately, don't wait
+      // await self.skipWaiting();             // activate immediately, don't wait
     })()
   );
 });
@@ -54,16 +54,36 @@ self.addEventListener("activate", (event) => {
   );
 });
 
-// ---- FETCH: fires on EVERY network request the page makes ----
-// Strategy = "cache-first": if we have it, return it; else go to network.
+// ---- MESSAGE: page asks us to activate the waiting SW ----
+self.addEventListener("message", (event) => {
+  if (event.data && event.data.type === "SKIP_WAITING") {
+    self.skipWaiting();
+  }
+});
+
+// ---- FETCH: network-first ----
+// Try the network first (fresh content). If it succeeds, cache a copy and
+// return it. If the network fails (offline), fall back to the cache.
 self.addEventListener("fetch", (event) => {
+  if (event.request.method !== "GET") return;  // let non-GET pass through
   event.respondWith(
     (async () => {
-      const cached = await caches.match(event.request);
-      if (cached) {
-        return cached;                      // instant, works offline
+      const cache = await caches.open(CACHE_NAME);
+
+      try {
+        const fresh = await fetch(event.request);
+        // Update the cache with the fresh copy for offline use later.
+        cache.put(event.request, fresh.clone());
+        return fresh;
+      } catch (err) {
+        // Network failed (offline / server down) → serve from cache.
+        const cached = await cache.match(event.request);
+        if (cached) {
+          return cached;
+        }
+        // Nothing cached either → let it fail naturally.
+        throw err;
       }
-      return fetch(event.request);          // not cached: hit the network
     })()
   );
 });

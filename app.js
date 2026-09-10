@@ -115,13 +115,55 @@ newColorBtn.addEventListener("click", function() {
 render(true);
 
 
-// ---- Register the service worker ----
-// Guarded: only run if the browser supports service workers.
+// ============================================================
+//  Service worker registration + update detection
+// ============================================================
 if ("serviceWorker" in navigator) {
-  window.addEventListener("load", () => {
-    navigator.serviceWorker
-      .register("./service-worker.js")
-      .then((reg) => console.log("[App] SW registered:", reg.scope))
-      .catch((err) => console.error("[App] SW registration failed:", err));
+  let refreshing = false;
+
+  // When the new SW takes control, reload once to get fresh assets.
+  navigator.serviceWorker.addEventListener("controllerchange", () => {
+    if (refreshing) return;   // guard against double-reload
+    refreshing = true;
+    window.location.reload();
+  });
+
+  window.addEventListener("load", async () => {
+    try {
+      const reg = await navigator.serviceWorker.register("./service-worker.js");
+      console.log("[App] SW registered:", reg.scope);
+
+      const banner = document.getElementById("updateBanner");
+      const refreshBtn = document.getElementById("refreshBtn");
+
+      // Helper: show banner and wire the button to the given waiting SW.
+      function promptUserToRefresh(worker) {
+        banner.classList.remove("hidden");
+        refreshBtn.onclick = () => {
+          worker.postMessage({ type: "SKIP_WAITING" });
+          // controllerchange (above) will fire and reload the page.
+        };
+      }
+
+      // Case 1: a new SW is already waiting when the page loads.
+      if (reg.waiting) {
+        promptUserToRefresh(reg.waiting);
+      }
+
+      // Case 2: a new SW is found and installs while the page is open.
+      reg.addEventListener("updatefound", () => {
+        const newWorker = reg.installing;
+        if (!newWorker) return;
+
+        newWorker.addEventListener("statechange", () => {
+          // "installed" + an existing controller = an update (not first install).
+          if (newWorker.state === "installed" && navigator.serviceWorker.controller) {
+            promptUserToRefresh(newWorker);
+          }
+        });
+      });
+    } catch (err) {
+      console.error("[App] SW registration failed:", err);
+    }
   });
 }

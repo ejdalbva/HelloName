@@ -12,7 +12,7 @@
 
   <!-- The input view: shown when no name is stored yet -->
   <div id="askView"> 
-    <label for="nameInput">What's your name?</label><br>
+    <label for="nameInput">What is your name?</label><br>
     <input type="text" id="nameInput" placeholder="Enter your name"><br>
     <label for="colorInput">Favorite color?</label><br>
     <input type="text" id="colorInput" placeholder="">
@@ -26,6 +26,12 @@
     <p id="modtime"></p>
     <button id="forgetBtn">Forget me</button>
     <button id="newColorBtn">New color</button>
+  </div>
+
+    <!-- Update banner: hidden until a new SW is waiting -->
+  <div id="updateBanner" class="hidden">
+    <span>A new version is available.</span>
+    <button id="refreshBtn" type="button">Refresh</button>
   </div>
 
   <script src="./app.js"></script>
