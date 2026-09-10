@@ -1,12 +1,12 @@
 // --- Grab references to the elements we'll work with ---
-const askView   = document.getElementById("askView");
-const greetView = document.getElementById("greetView");
-const nameInput = document.getElementById("nameInput");
-const colorInput = document.getElementById("colorInput");
-const saveBtn   = document.getElementById("saveBtn");
-const forgetBtn = document.getElementById("forgetBtn");
-const greeting  = document.getElementById("greeting");
-const color     = document.getElementById("color");   // <-- added (see note)
+const askView     = document.getElementById("askView");
+const greetView   = document.getElementById("greetView");
+const nameInput   = document.getElementById("nameInput");
+const colorInput  = document.getElementById("colorInput");
+const saveBtn     = document.getElementById("saveBtn");
+const forgetBtn   = document.getElementById("forgetBtn");
+const greetingTxt = document.getElementById("greeting");
+const colorTxt    = document.getElementById("color");   // <-- added (see note)
 
 const STORAGE_KEY = "userName";
 const COLOR_KEY = "favoriteColor";
@@ -15,14 +15,14 @@ const COLOR_KEY = "favoriteColor";
 function render() {
   const savedName = localStorage.getItem(STORAGE_KEY);
   const savedColor = localStorage.getItem(COLOR_KEY);
-  greeting.textContent = null;
-  color.textContent = null;
+  greetingTxt.textContent = null;
+  colorTxt.textContent = null;
   if (savedName || savedColor){
     if (savedName) {
-        greeting.textContent = "Hi there, " + savedName + "!";
+        greetingTxt.textContent = "Hi there, " + savedName + "!";
     }
     if (savedColor) {
-        color.textContent = "Favorite color: " + savedColor;
+        colorTxt.textContent = "Favorite color: " + savedColor;
     }
     askView.classList.add("hidden");
     greetView.classList.remove("hidden");
@@ -40,12 +40,16 @@ saveBtn.addEventListener("click", function () {
       localStorage.setItem(STORAGE_KEY, name);
   }
   else {
+    // storage might have a value from earlier save, 
+    // but don't want it to be displayed if we 
+    // redisplay the color, so remove it
     localStorage.removeItem(STORAGE_KEY);
   }
   if (color) {
     localStorage.setItem(COLOR_KEY, color);
   }
   else {
+    // similarly, remove any previously-stored value
     localStorage.removeItem(COLOR_KEY);
   }
   if (name || color){
