@@ -32,6 +32,16 @@ function render() {
   }
 }
 
+// Event handler for text inputs 
+// (enter key -> click [Save])
+function saveOnEnter(event){
+  if (event.key === "Enter"){
+    saveBtn.click();
+  }
+}
+nameInput.addEventListener("keydown", saveOnEnter);
+colorInput.addEventListener("keydown", saveOnEnter);
+
 // --- Save button: store the name, then re-render ---
 saveBtn.addEventListener("click", function () {
   const name = nameInput.value.trim();
