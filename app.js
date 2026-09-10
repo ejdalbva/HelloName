@@ -8,17 +8,21 @@ const forgetBtn   = document.getElementById("forgetBtn");
 const newColorBtn = document.getElementById("newColorBtn");
 const greetingTxt = document.getElementById("greeting");
 const colorTxt    = document.getElementById("color");   // <-- added (see note)
+const modTimeTxt  = document.getElementById("modtime");
 
 const STORAGE_KEY = "userName";
 const COLOR_KEY = "favoriteColor";
+const MOD_TIME_KEY = "lastModified";
 
 // --- Decide which view to show, based on stored data ---
 function render(showAsk) {
   const savedName = localStorage.getItem(STORAGE_KEY);
   const savedColor = localStorage.getItem(COLOR_KEY);
+  const savedTime = localStorage.getItem(MOD_TIME_KEY);
   greetingTxt.textContent = "";
-  greetingTxt.style.color = "black"
+  greetingTxt.style.color = "black";
   colorTxt.textContent = "";
+  modTimeTxt.textContent = "";
   if (savedName || savedColor){
     if (savedName) {
         greetingTxt.textContent = "Hi there, " + savedName + "!";
@@ -29,11 +33,25 @@ function render(showAsk) {
     }
   }
   if (showAsk){
+    // make the askView visible _before_ trying to
+    // set the focus on one of it's text boxes
     askView.classList.remove("hidden");
     greetView.classList.add("hidden");
+    if (!savedName)
+    {
+      requestAnimationFrame(() => nameInput.focus());
+    }
+    else if (!savedColor) {
+      requestAnimationFrame(() => colorInput.focus());
+    }
+    console.log("active element is: ", document.activeElement.id ); 
   } else {
     askView.classList.add("hidden");
     greetView.classList.remove("hidden");
+    if (savedTime) {
+      const when = new Date(savedTime);
+      modTimeTxt.textContent = "Last updated: " + when.toLocaleString();
+    }
   }
 }
 
@@ -66,6 +84,13 @@ saveBtn.addEventListener("click", function () {
   else {
     // similarly, remove any previously-stored value
     localStorage.removeItem(COLOR_KEY);
+  }
+
+  // Update last-modified time
+  if (name || color) {
+    localStorage.setItem(MOD_TIME_KEY, new Date().toISOString());
+  } else {
+    localStorage.removeItem(MOD_TIME_KEY);
   }
   render(false);
 });
