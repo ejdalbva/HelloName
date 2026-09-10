@@ -15,8 +15,8 @@ const COLOR_KEY = "favoriteColor";
 function render() {
   const savedName = localStorage.getItem(STORAGE_KEY);
   const savedColor = localStorage.getItem(COLOR_KEY);
-  greetingTxt.textContent = null;
-  colorTxt.textContent = null;
+  greetingTxt.textContent = "";
+  colorTxt.textContent = "";
   if (savedName || savedColor){
     if (savedName) {
         greetingTxt.textContent = "Hi there, " + savedName + "!";
@@ -52,9 +52,7 @@ saveBtn.addEventListener("click", function () {
     // similarly, remove any previously-stored value
     localStorage.removeItem(COLOR_KEY);
   }
-  if (name || color){
-    render();
-  }
+  render();
 });
 
 // --- Forget button: clear the stored name, then re-render ---
