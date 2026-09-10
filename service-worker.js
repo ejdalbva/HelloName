@@ -5,7 +5,7 @@
 
 // A version-stamped cache name. Bump the version (v1 -> v2)
 // whenever you change cached files, so old caches get cleaned.
-const CACHE_NAME = "hello-name-v10";
+const CACHE_NAME = "hello-name-v11";
 
 // The files that make up the "app shell" — everything needed
 // to load and run offline. Paths are relative to this file's folder.

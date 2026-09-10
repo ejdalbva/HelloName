@@ -44,7 +44,6 @@ function render(showAsk) {
     else if (!savedColor) {
       requestAnimationFrame(() => colorInput.focus());
     }
-    console.log("active element is: ", document.activeElement.id ); 
   } else {
     askView.classList.add("hidden");
     greetView.classList.remove("hidden");
@@ -112,8 +111,8 @@ newColorBtn.addEventListener("click", function() {
 })
 
 // --- Run once at startup ---
-render(true);
-
+const hasSavedData = localStorage.getItem(STORAGE_KEY) || localStorage.getItem(COLOR_KEY);
+render(!hasSavedData);   // no data -> show ask; data exists -> show greeting
 
 // ============================================================
 //  Service worker registration + update detection
